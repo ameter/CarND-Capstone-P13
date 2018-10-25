@@ -40,13 +40,14 @@ class TLDetector(object):
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb) # from simulator (continuous data about upcomming lights... I don't fully understand this)
         sub6 = rospy.Subscriber('/image_color', Image, self.image_cb) # from vehicle
 
-        config_string = rospy.get_param("/traffic_light_config") #stopline positions and camera info
+        config_string = rospy.get_param("/traffic_light_config") #stopline positions and camera info AND real vs. sim
         self.config = yaml.load(config_string)
 
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1) # to waypoint updater
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
+        # Read parameter to deterine if we're running in the sim or on Carla and pass to classifier constructor.
+        self.light_classifier = TLClassifier(self.config['is_site'])
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -130,13 +131,13 @@ class TLDetector(object):
         # For testing, just return the light state
         #rospy.logwarn("getting light state")
         #rospy.logwarn(light.state)
-        return light.state
+        #return light.state
 
         if(not self.has_image):
             self.prev_light_loc = None
             return False
 
-        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "rgb8")
 
         #Get classification
         return self.light_classifier.get_classification(cv_image)
@@ -174,6 +175,7 @@ class TLDetector(object):
 
         if light:
             state = self.get_light_state(light)
+            print("state: {}".format(state))
             return light_wp, state
 
         self.waypoints = None
