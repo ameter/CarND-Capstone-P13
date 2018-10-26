@@ -34,10 +34,10 @@ class TLDetector(object):
         /vehicle/traffic_lights provides you with the location of the traffic light in 3D map space and
         helps you acquire an accurate ground truth data source for the traffic light
         classifier by sending the current color state of all traffic lights in the
-        simulator. When testing on the vehicle, the color state will not be available. You'll need to
+        simulator. When testing on the vehicle, the color statewill not be available. You'll need to
         rely on the position of the light and the camera image to predict it.
         '''
-        sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb) # from simulator (continuous data about upcomming lights... I don't fully understand this)
+        sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb) # from simulator (continuous data about upcomming lights.
         sub6 = rospy.Subscriber('/image_color', Image, self.image_cb) # from vehicle
 
         config_string = rospy.get_param("/traffic_light_config") #stopline positions and camera info AND real vs. sim
@@ -131,7 +131,7 @@ class TLDetector(object):
         # For testing, just return the light state
         #rospy.logwarn("getting light state")
         #rospy.logwarn(light.state)
-        #return light.state
+        return light.state
 
         if(not self.has_image):
             self.prev_light_loc = None
@@ -152,29 +152,32 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        light = None
+        closest_light = None
         light_wp = None
 
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
         if(self.pose):
-            car_position = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
+            car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
         # Find the closest visible traffic light (if one exists)
-        diff = len(self.waypoints.waypoints)
+        wp_len = len(self.waypoints.waypoints)
         for i, light in enumerate(self.lights):
             # Get stop line waypoint index
             line = stop_line_positions[i]
-            temp_light_wp = self.get_closest_waypoint(line[0], line[1])
+            light_wp_idx = self.get_closest_waypoint(line[0], line[1])
             # Find the closest stop line waypoint index
-            d = temp_light_wp - car_position
-            if d >= 0 and d < diff:
-                diff = 0
+            wp_delta = light_wp_idx - car_wp_idx
+            if wp_delta >= 0 and wp_delta < wp_len:
                 closest_light = light
-                light_wp = temp_light_wp
+                light_wp = light_wp_idx
+                break
 
-        if light:
-            state = self.get_light_state(light)
+        if closest_light:
+            if wp_delta < 150:
+                state = self.get_light_state(closest_light)
+            else:
+                state = TrafficLight.UNKNOWN
             print("state: {}".format(state))
             return light_wp, state
 
