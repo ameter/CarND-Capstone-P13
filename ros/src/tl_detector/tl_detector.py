@@ -131,7 +131,7 @@ class TLDetector(object):
         # For testing, just return the light state
         #rospy.logwarn("getting light state")
         #rospy.logwarn(light.state)
-        return light.state
+        #return light.state
 
         if(not self.has_image):
             self.prev_light_loc = None
@@ -178,7 +178,7 @@ class TLDetector(object):
                 state = self.get_light_state(closest_light)
             else:
                 state = TrafficLight.UNKNOWN
-            print("state: {}".format(state))
+            #print("state: {}".format(state))
             return light_wp, state
 
         self.waypoints = None
