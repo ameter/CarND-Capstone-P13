@@ -178,7 +178,7 @@ class TLDetector(object):
                 state = self.get_light_state(closest_light)
             else:
                 state = TrafficLight.UNKNOWN
-            #print("state: {}".format(state))
+            rospy.logwarn("state: {}".format(state))
             return light_wp, state
 
         self.waypoints = None

@@ -95,7 +95,7 @@ class TLClassifier(object):
             else:
                 break
 
-        self.output_debug(image, output_dict)
+        #self.output_debug(image, output_dict)
 
         if len(state) == 1:
             return self.TrafficLightClasstoMsgMap[state.pop()]
