@@ -34,6 +34,9 @@ class TLClassifier(object):
         else:
             path_to_frozen_graph = os.path.dirname(os.path.realpath(__file__)) + '/graphs/' +SIM_MODEL
 
+        cp = tf.ConfigProto()
+        cp.gpu_options.allow_growth = True
+
         # Load a (frozen) TensorFlow model into memory.
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default():
@@ -43,11 +46,16 @@ class TLClassifier(object):
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
 
+                self.sess = tf.Session(graph=self.detection_graph, config=cp)
+
             # Get handles to input and output tensors
             self.image_tensor = tf.get_default_graph().get_tensor_by_name('image_tensor:0')
             self.return_tensor_dict = {}
             for key in ['num_detections', 'detection_boxes', 'detection_scores', 'detection_classes']:
                 self.return_tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(key + ':0')
+
+
+            #tf.Session().run(tf.constant(5.0) * tf.constant(6.0))
 
         # Create class index to TrafficLight message mapping
         # rosmsg show styx_msgs/TrafficLight
@@ -55,7 +63,7 @@ class TLClassifier(object):
         # uint8 GREEN=2
         # uint8 YELLOW=1
         # uint8 RED=0
-        self.TrafficLightClasstoMsgMap = [4, TrafficLight.GREEN, TrafficLight.RED, 4, 4, 4, 4, TrafficLight.YELLOW, 4, 4, 4, 4, 4, 4, 4] 
+        self.TrafficLightClasstoMsgMap = [4, TrafficLight.GREEN, TrafficLight.RED, TrafficLight.YELLOW, TrafficLight.UNKNOWN] 
 
         # Load label map
         #Label maps map indices to category names, so that when our convolution network predicts 5, we know that this corresponds to airplane. Here we use internal utility functions, but anything that returns a dictionary mapping integers to appropriate string labels would be fine.
@@ -75,14 +83,15 @@ class TLClassifier(object):
         """
         #TODO implement light color prediction
 
-        rospy.logwarn("Getting classification...")
+        #rospy.logwarn("Getting classification...")
 
         with self.detection_graph.as_default():
-            with tf.Session() as sess:
+            #with tf.Session() as sess:
                 # Run inference
-                output_dict = sess.run(self.return_tensor_dict, feed_dict={self.image_tensor: np.expand_dims(image, 0)})
+            output_dict = self.sess.run(self.return_tensor_dict, feed_dict={self.image_tensor: np.expand_dims(image, 0)})
 
         # all outputs are float32 numpy arrays, so convert types as appropriate
+        output_dict['num_detections'] = int(output_dict['num_detections'][0])
         output_dict['detection_classes'] = output_dict['detection_classes'][0].astype(np.uint8)
         output_dict['detection_scores'] = output_dict['detection_scores'][0]
 
@@ -105,27 +114,26 @@ class TLClassifier(object):
 
     def output_debug(self, image, output_dict):
         # all outputs are float32 numpy arrays, so convert types as appropriate
-        output_dict['num_detections'] = int(output_dict['num_detections'][0])
         output_dict['detection_boxes'] = output_dict['detection_boxes'][0]
 
-        return
-
-        category_index = {1: {'id': 1, 'name': 'Green'}, 2: {'id': 2, 'name': 'Red'}, 7: {'id': 7, 'name': 'Yellow'}, 8: {'id': 8, 'name': 'off'}}
+        
 
         rospy.logwarn("output_dict: {}".format(output_dict))
         
         # Visualization of the results of a detection.
-        vis_util.visualize_boxes_and_labels_on_image_array(
-            image,
-            output_dict['detection_boxes'],
-            output_dict['detection_classes'],
-            output_dict['detection_scores'],
-            category_index,
-            instance_masks=output_dict.get('detection_masks'),
-            use_normalized_coordinates=True,
-            line_thickness=8)
+        # category_index = {1: {'id': 1, 'name': 'Green'}, 2: {'id': 2, 'name': 'Red'}, 3: {'id': 3, 'name': 'Yellow'}, 4: {'id': 4, 'name': 'off'}}
 
-        plt.imshow(image)
-        plt.show()
+        # vis_util.visualize_boxes_and_labels_on_image_array(
+        #     image,
+        #     output_dict['detection_boxes'],
+        #     output_dict['detection_classes'],
+        #     output_dict['detection_scores'],
+        #     category_index,
+        #     instance_masks=output_dict.get('detection_masks'),
+        #     use_normalized_coordinates=True,
+        #     line_thickness=8)
+
+        # plt.imshow(image)
+        # plt.show()
 
 
