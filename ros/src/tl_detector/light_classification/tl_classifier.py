@@ -9,14 +9,14 @@ import numpy as np
 import os
 import tensorflow as tf
 
-from PIL import Image
+#from PIL import Image
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 import rospy
 
 #from utils import label_map_util
-from utils import visualization_utils as vis_util
+#from utils import visualization_utils as vis_util
 
 
 class TLClassifier(object):
@@ -107,6 +107,8 @@ class TLClassifier(object):
         # all outputs are float32 numpy arrays, so convert types as appropriate
         output_dict['num_detections'] = int(output_dict['num_detections'][0])
         output_dict['detection_boxes'] = output_dict['detection_boxes'][0]
+
+        return
 
         category_index = {1: {'id': 1, 'name': 'Green'}, 2: {'id': 2, 'name': 'Red'}, 7: {'id': 7, 'name': 'Yellow'}, 8: {'id': 8, 'name': 'off'}}
 
