@@ -40,7 +40,7 @@ class TLDetector(object):
         rely on the position of the light and the camera image to predict it.
         '''
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb) # from simulator (continuous data about upcomming lights.
-        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb, queue_size=1, buff_size=2000000) # from vehicle
+        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb) # from vehicle
 
         config_string = rospy.get_param("/traffic_light_config") #stopline positions and camera info AND real vs. sim
         self.config = yaml.load(config_string)
@@ -175,6 +175,7 @@ class TLDetector(object):
                 light_wp_idx = self.get_closest_waypoint(line[0], line[1])
                 # Find the closest stop line waypoint index
                 wp_delta = light_wp_idx - car_wp_idx
+                #print(wp_delta)
                 if wp_delta >= 0 and wp_delta < wp_len:
                     closest_light = light
                     light_wp = light_wp_idx

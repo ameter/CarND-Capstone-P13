@@ -4,19 +4,13 @@
 # https://github.com/tensorflow/models/blob/master/research/object_detection/object_detection_tutorial.ipynb
 
 from styx_msgs.msg import TrafficLight
-
 import numpy as np
 import os
 import tensorflow as tf
-
-#from PIL import Image
-
-#import matplotlib.pyplot as plt
-
 import rospy
 
-#from utils import label_map_util
-#from utils import visualization_utils as vis_util
+# import matplotlib.pyplot as plt
+# from utils import visualization_utils as vis_util
 
 
 class TLClassifier(object):
@@ -104,7 +98,7 @@ class TLClassifier(object):
             else:
                 break
 
-        #self.output_debug(image, output_dict)
+        #elf.output_debug(image, output_dict)
 
         if len(state) == 1:
             return self.TrafficLightClasstoMsgMap[state.pop()]
@@ -121,19 +115,19 @@ class TLClassifier(object):
         rospy.logwarn("output_dict: {}".format(output_dict))
         
         # Visualization of the results of a detection.
-        # category_index = {1: {'id': 1, 'name': 'Green'}, 2: {'id': 2, 'name': 'Red'}, 3: {'id': 3, 'name': 'Yellow'}, 4: {'id': 4, 'name': 'off'}}
+        category_index = {1: {'id': 1, 'name': 'Green'}, 2: {'id': 2, 'name': 'Red'}, 3: {'id': 3, 'name': 'Yellow'}, 4: {'id': 4, 'name': 'off'}}
 
-        # vis_util.visualize_boxes_and_labels_on_image_array(
-        #     image,
-        #     output_dict['detection_boxes'],
-        #     output_dict['detection_classes'],
-        #     output_dict['detection_scores'],
-        #     category_index,
-        #     instance_masks=output_dict.get('detection_masks'),
-        #     use_normalized_coordinates=True,
-        #     line_thickness=8)
+        vis_util.visualize_boxes_and_labels_on_image_array(
+            image,
+            output_dict['detection_boxes'],
+            output_dict['detection_classes'],
+            output_dict['detection_scores'],
+            category_index,
+            instance_masks=output_dict.get('detection_masks'),
+            use_normalized_coordinates=True,
+            line_thickness=8)
 
-        # plt.imshow(image)
-        # plt.show()
+        plt.imshow(image)
+        plt.show()
 
 
