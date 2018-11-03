@@ -34,7 +34,7 @@ class WaypointUpdater(object):
         rospy.init_node('waypoint_updater')
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
-        self.waypoints = None
+        self.base_waypoints = None
         self.pose = None
         self.waypoints_2d = None
         self.waypoint_tree = None
